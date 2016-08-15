@@ -1,0 +1,199 @@
+<!-- make circles bigger if they have more occurences
+    no collisions between circles -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Chapter 14 Related Equations</title>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Playfair+Display:400italic' rel='stylesheet' type='text/css'>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script type="text/x-mathjax-config">
+  MathJax.Hub.Config({tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}});
+</script>
+<script type="text/javascript"
+  src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<style>
+
+div.tooltip {
+  position: absolute;   
+  text-align: center;   
+  width: 60px;  
+  height: 28px;     
+  padding: 2px; 
+  font: 12px sans-serif;        
+}
+.node {
+    fill: #000;
+    stroke-width: 2px;
+    padding: 5px;
+}
+
+.link {
+    stroke: black;
+    stroke-width: 2px;
+}
+h1, h2, h3 {
+    font-style: normal;
+     font-family: 'Open Sans', sans-serif;
+}
+body {
+    background: #fff;
+    font-family: 'Playfair Display', serif;
+    font-weight: bold;
+    text-align: center;
+    font-style: italic;
+}
+    </style>
+</head>
+<body>
+    <h1>Chapter 14</h1>
+    <h2>Connections between the relevant equations and their variables.</h2>
+    <h3>Each colored edge represents a different equation, and each node represents a variable</h3>
+<script>
+
+
+var width = 960,
+    height = 600;
+
+var color = d3.scale.category20();
+
+//all chapter 14 equations
+var nodes = [
+    {"name": "F", "eq": [1]},
+    {"name": "f", "eq": [8, 9]},
+    {"name": "k", "eq": [1, 2, 4]},
+    {"name": "∆x", "eq": [1]},
+    {"name": "Δy", "eq": [2]},
+    {"name": "m", "eq": [2, 3]},
+    {"name": "g", "eq": [2, 5, 6]},
+    {"name": "K", "eq": [3]},
+    {"name": "v", "eq": [3]},
+    {"name": "U", "eq": [4]},
+    {"name": "x", "eq": [4]},
+    {"name": "T", "eq": [5, 9]},
+    {"name": "L", "eq": [5, 6]},
+    {"name": "ω", "eq": [6, 8, 10, 11, 12]},
+    {"name": "A", "eq": [10, 11, 12, 13, 15]}, //7, 19, 11, 12, 13 :5
+    {"name": "t", "eq": [10, 15]}, //7, 10 :2
+    {"name": "xmax", "eq": [15]},
+    {"name": "τ", "eq": [15]},
+    {"name": "x(t)", "eq": [10]},
+    {"name": "ϕ", "eq": [10, 12, 13]},
+    {"name": "amax", "eq": [11]},
+    {"name": "v(0)", "eq": [12]},
+    {"name": "x(0)", "eq": [13]},
+];
+
+var k = 0;
+var links = [];
+n = 0;
+
+for (var i = 0; i < nodes.length; i++) {
+    
+    for (var k = i + 1; k < nodes.length; k++) {
+        a = nodes[i].eq;
+        a = a.sort(compare);
+        b = nodes[k].eq;
+        b = b.sort(compare);
+        s = 0,
+        f = 0;
+
+        if (i === 13) {
+            console.log(a, b);
+        }
+        while (s < a.length && f < b.length) {
+            if (a[s] < b[f]) {
+                ++s;
+            }
+            else if (b[f] < a[s]) {
+                ++f;
+            }
+            else {
+                links[n] = {
+                    source: i,
+                    eq: b[f],
+                    target: k,
+                    k: k
+                }
+                console.log(links[n].source, links[n].target, links[n].eq)
+                n++;
+                ++s;
+                ++f;
+            }
+        }
+        function compare(a,b) {
+            return a - b;
+        }
+    }
+}
+
+var svg = d3.select('body').append('svg')
+    .attr('width', width)
+    .attr('height', height);
+
+var k = Math.sqrt(nodes.length / (width * height));
+
+var force = d3.layout.force()
+    .size([width, height])
+    .nodes(nodes)
+    .links(links)
+    .linkDistance(50)
+    .charge(-70 / k)
+    .gravity(250 * k)
+
+var link = svg.selectAll('.link')
+    .data(links)
+    .enter().append('line')
+    .attr('class', 'link')
+
+var div = d3.select("body")
+    .append("div")  // declare the tooltip div 
+    .attr("class", "tooltip")              // apply the 'tooltip' class
+
+var node = svg.selectAll('.node')
+    .data(nodes)
+    .enter().append('circle')
+    .attr('class', 'node')
+
+var texts = svg.selectAll("text.label")
+    .data(nodes)
+    .enter().append("text")
+    .attr("width", 200)
+    .attr("height", 100)
+    .attr("dx", 10)
+    .attr("dy", ".35em")
+    .attr("class", "label")
+    .attr("fill", "black")
+    .text(function(d) {  return d.name;  })
+
+force.on("tick", function(e) {
+
+    /*Give characteristics to the nodes*/
+    node.attr('r', function(d) { return 4; })
+        .attr('cx', function(d, newR) { return d.x = Math.max(newR + 50, Math.min(width - newR, d.x)) })
+        .attr('cy', function(d, newR) { return d.y = Math.max(newR + 50, Math.min(height - newR, d.y)) })
+        .style("fill", function (d) { 
+           });
+
+    /*Give characteristics to the edges*/
+    link.attr('x1', function(d) { return d.source.x; })
+        .attr('y1', function(d) { return d.source.y; })
+        .attr('x2', function(d) { return d.target.x; })
+        .attr('y2', function(d) { return d.target.y; })
+        .style("stroke", function(d) { return color(d.eq); });
+
+/*Give characteristics to the labels*/
+    texts.attr("transform", function(d) {
+        return "translate(" + d.x + "," + d.y + ")";
+    });
+
+});
+
+force.start();
+</script>
+</body>
+</html>
