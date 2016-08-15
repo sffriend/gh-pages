@@ -1,0 +1,169 @@
+<!-- make circles bigger if they have more occurences
+    no collisions between circles -->
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Mass and Related Equations</title>
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Playfair+Display:400italic' rel='stylesheet' type='text/css'>
+        <style>
+
+.node {
+    fill: black;
+    stroke-width: 2px;
+}
+
+.link {
+    stroke: black;
+    stroke-width: 2px;
+}
+
+h1, h2, h3 {
+    font-style: normal;
+     font-family: 'Open Sans', sans-serif;
+}
+body {
+    background: #fff;
+    font-family: 'Playfair Display', serif;
+    font-weight: bold;
+    text-align: center;
+    font-style: italic;
+}
+    </style>
+</head>
+<body>
+
+ <h1>Mass</h1>
+    <h2>All mass's relevant equations and the variables within them</h2>
+    <h3>Each colored edge represents a different equation, and each node represents a variable</h3>
+<script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+<script>
+
+
+var width = 960,
+    height = 600;
+
+var color = d3.scale.category10();
+
+var nodes = [
+    {"name": "m", "eq": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], "freq": {"given":0, "hidden":1, "find":0}},
+    {"name": "K", "eq": [1], "freq": {"given":1, "hidden":0, "find":0}},
+    {"name": "v", "eq": [1, 6, 7, 9], "freq": {"given":0, "hidden":1, "find":0}},
+    {"name": "ρ", "eq": [2], "freq": {"given":1, "hidden":1, "find":1}},
+    {"name": "V", "eq": [2], "freq": {"given":0, "hidden":1, "find":0}},
+    {"name": "y", "eq": [3], "freq": {"given":0, "hidden":1, "find":0}},
+    {"name": "g", "eq": [3, 11], "freq": {"given":1, "hidden":1, "find":1}},
+    {"name": "µ", "eq": [8], "freq": {"given":0, "hidden":0, "find":1}},
+    {"name": "k", "eq": [3, 4, 5, 6, 7], "freq": {"given":0, "hidden":1, "find":1}},
+    {"name": "w", "eq": [4]},
+    {"name": "T", "eq": [5, 11]},
+    {"name": "p", "eq": [9]},
+    {"name": "a", "eq": [10]},
+    {"name": "F", "eq": [10]},
+    {"name": "E", "eq": [7]},
+    {"name": "x", "eq": [7]},
+    {"name": "A", "eq": [6]},
+    {"name": "L", "eq": [8]}
+];
+
+var k = 0;
+var links = [];
+n = 0;
+
+for (var i = 0; i < nodes.length; i++) {
+    
+    for (var k = i + 1; k < nodes.length; k++) {
+        a = nodes[i].eq;
+        a.sort(compare);
+        b = nodes[k].eq;
+        b.sort(compare);
+        console.log("A", a, "B", b);
+        s = 0,
+        f = 0;
+        while (s < a.length && f < b.length) {
+            if (a[s] < b[f]) {
+                ++s;
+            }
+            else if (b[f] < a[s]) {
+                ++f;
+            }
+            else {
+                console.log(b[f], a[s])
+                links[n] = {
+                    source: i,
+                    eq: b[f],
+                    target: k,
+                    k: k
+                }
+                n++;
+                ++s;
+                ++f;
+            }
+        }
+        function compare(a,b) {
+            return a - b;
+        }
+    }
+}
+
+var svg = d3.select('body').append('svg')
+    .attr('width', width)
+    .attr('height', height);
+
+var k = Math.sqrt(nodes.length / (width * height));
+
+var force = d3.layout.force()
+    .size([width, height])
+    .nodes(nodes)
+    .links(links)
+    .linkDistance(50)
+    .charge(-100 / k)
+    .gravity(300 * k)
+
+var link = svg.selectAll('.link')
+    .data(links)
+    .enter().append('line')
+    .attr('class', 'link')
+
+var node = svg.selectAll('.node')
+    .data(nodes)
+    .enter().append('circle')
+    .attr('class', 'node')
+
+var texts = svg.selectAll("text.label")
+    .data(nodes)
+    .enter().append("text")
+    .attr("class", "label")
+    .attr("fill", "black")
+    .attr("dx", "15")
+    .attr("dy", ".35em")
+    .text(function(d) {  return d.name;  });
+
+force.on("tick", function(e) {
+
+    /*Give characteristics to the nodes*/
+    node.attr('r', function(d) { return newR = d.weight*1; })
+        .attr('cx', function(d, newR) { return d.x = Math.max(newR + 50, Math.min(width - newR, d.x)) })
+        .attr('cy', function(d, newR) { return d.y = Math.max(newR + 50, Math.min(height - newR, d.y)) })
+
+    /*Give characteristics to the edges*/
+    link.attr('x1', function(d) { return d.source.x; })
+        .attr('y1', function(d) { return d.source.y; })
+        .attr('x2', function(d) { return d.target.x; })
+        .attr('y2', function(d) { return d.target.y; })
+        .style("stroke", function(d) { return color(d.eq); });
+
+/*Give characteristics to the labels*/
+    texts
+    .attr("transform", function(d) {
+        return "translate(" + d.x + "," + d.y + ")";
+    });
+
+});
+force.start();
+
+    </script>
+</body>
+</html>
