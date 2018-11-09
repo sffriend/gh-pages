@@ -7,7 +7,8 @@ body {
   font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 16px;
   line-height: 1.5;
-  background: url('DSC_0831.JPG') cover;
+  background-image: url('DSCF0199.JPG');
+  background-size: cover;
   color: #606c71; }
 
 a {
@@ -104,7 +105,12 @@ a {
 @media screen and (max-width: 42em) {
   .project-tagline {
     font-size: 1rem; } }
-
+.main-content {
+      background: white;
+    border: 1px solid black;
+    width: 50%;
+    margin: 60px;
+}
 .main-content :first-child {
   margin-top: 0; }
 .main-content img {
@@ -113,7 +119,7 @@ a {
   margin-top: 2rem;
   margin-bottom: 1rem;
   font-weight: normal;
-  color: #159957; }
+  }
 .main-content p {
   margin-bottom: 1em; }
 .main-content code {
